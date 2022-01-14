@@ -4,8 +4,9 @@ using UnityEngine;
 public class charaController : MonoBehaviour
 {
     int a=0;
-    GameObject camera;
-    GameObject effect;
+    GameObject camera;//デストロイ用
+    GameObject effect;//デストロイ用
+    GameObject enemy;//デストロイ用
     Vector3 cameraRot;
     Rigidbody rigid;
     float walkSpeed;
@@ -26,6 +27,7 @@ public class charaController : MonoBehaviour
     {
         this.effect = GameObject.Find("effect");
         this.camera = GameObject.Find("Main Camera");
+        this.enemy = GameObject.Find("Misaki_win_humanoid");
         animator = GetComponent<Animator>();
         this.rigid = GetComponent<Rigidbody>();
         walkSpeed = 0;
@@ -140,16 +142,7 @@ public class charaController : MonoBehaviour
     void OnTriggerEnter(Collider objName)
     {
         animator.SetBool("isJumping", false);
-        if (objName.gameObject.name == areaName)//ゲームオーバーでキャラを消す
-        {
-            Vector3 playPos = this.transform.position;
-            playPos.y += 1.0f;
-            effect.GetComponent<effectController>().playEffect(playPos);
-            Destroy(this);//このオブジェクトのコンポーネントを消す
-            Destroy(camera.GetComponent<cameraController>());//メインカメラのスクリプトを消す
-            Destroy(this.gameObject);//ユニティちゃんを消す
-            Debug.Log("effectOn!");
-        }
+        
     }
     void OnCollisionEnter(Collision collision)
     {
@@ -166,11 +159,25 @@ public class charaController : MonoBehaviour
             animator.SetBool("isJumping", false);
             //jumpAble = false;
         }
-        
+        if (collision.gameObject.name == areaName)//ゲームオーバーでキャラを消す
+        {
+            deletePlayer();
+            Debug.Log("effectOn!");
+        }
 
     }
     private void OnTriggerStay(Collider objName)
     {
         
+    }
+    void deletePlayer()
+    {
+        Vector3 playPos = this.transform.position;
+        playPos.y += 1.0f;
+        effect.GetComponent<effectController>().playEffect(playPos);
+        Destroy(this);//このオブジェクトのコンポーネントを消す
+        Destroy(camera.GetComponent<cameraController>());//メインカメラのスクリプトを消す
+        Destroy(this.gameObject);//ユニティちゃんを消す
+        Destroy(this.enemy.GetComponent<enemyController>());
     }
 }

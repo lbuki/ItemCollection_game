@@ -5,26 +5,20 @@ using UnityEngine;
 public class attackController : MonoBehaviour
 {
     [SerializeField]
-    private GameObject areaPrefab;
-    Vector3 square;
+    private GameObject areaPrefab;//アウトレット接続
     Vector3 pos;
     GameObject Player;
+    const string name = "Misaki_win_humanoid";
     private void Start()
     {
-        this.Player=GameObject.Find("SD_unitychan_humanoid");
+        this.Player=GameObject.Find(name);
     }
     // Start is called before the first frame update
     
-    private void Update()
+    public void generateAttackArea()
     {
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            GameObject area = Instantiate(areaPrefab) as GameObject;
+            GameObject square = Instantiate(areaPrefab) as GameObject;
             pos = this.Player.transform.position;
-            pos.z += 5;
-            area.transform.position = pos;
-        }
-
+            square.transform.position = pos;
     }
-
 }
