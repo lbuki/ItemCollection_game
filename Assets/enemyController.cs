@@ -8,18 +8,23 @@ public class enemyController : MonoBehaviour
     GameObject attack;
     Rigidbody E_rigid;
     Vector3 T_Vector;
+    public Animator E_animator;
     bool nearBy = false;
     bool attackCheck = false;
+    bool finished = true;
     float totalWalkspeed;
     float walkSpeed　= 10f;//加える力
     float speedScale = 1f;//後で速さを変更できるように倍率を設定
-    const float maxWalkSpeed = 2.5f;
+    const float maxWalkSpeed = 5.0f;
     void Start()
     {
         
         this.attack = GameObject.Find("areaGenerator");
         this.E_rigid = GetComponent<Rigidbody>();
         this.target = GameObject.Find("SD_unitychan_humanoid");
+        E_animator = GetComponent<Animator>();
+        E_animator.SetBool("is_running", true);
+        E_animator.SetBool("attack", false);
     }
 
     // Update is called once per frame
@@ -39,7 +44,7 @@ public class enemyController : MonoBehaviour
         direction.z = 0f;
         this.transform.rotation = direction;
         totalWalkspeed = Mathf.Abs(this.E_rigid.velocity.x) + Mathf.Abs(this.E_rigid.velocity.z);
-        if (nearBy == false && totalWalkspeed < maxWalkSpeed)
+        if (finished == true && nearBy == false && totalWalkspeed < maxWalkSpeed)
         {
             this.E_rigid.AddForce(transform.forward * walkSpeed * speedScale);
         }
@@ -55,7 +60,9 @@ public class enemyController : MonoBehaviour
         if(objName.gameObject.name == "SD_unitychan_humanoid")
         {
             attackCheck = true;
+            E_animator.SetBool("attack", true);
             nearBy = true;
+            E_animator.SetBool("is_running", false);
             //speedScale = 0f;
         }
     }
@@ -64,6 +71,7 @@ public class enemyController : MonoBehaviour
         if (objName.gameObject.name == "SD_unitychan_humanoid")
         {
             nearBy = true;
+            E_animator.SetBool("is_running", false);
             this.E_rigid.velocity = new Vector3(0.5f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.5f * this.E_rigid.velocity.z);
         }
     }
@@ -72,6 +80,7 @@ public class enemyController : MonoBehaviour
         if (objName.gameObject.name == "SD_unitychan_humanoid")
         {
             nearBy = false;
+            E_animator.SetBool("is_running", true);
             //attackCheck = false;
             //speedScale = 1.0f;
         }
@@ -79,9 +88,11 @@ public class enemyController : MonoBehaviour
     IEnumerator attackFunc()
     {
         Debug.Log("yonda");
-        yield return new WaitForSeconds(1);
+        finished = false;
+        yield return new WaitForSeconds(0.6f);
         attack.GetComponent<attackController>().generateAttackArea();
         yield return new WaitForSeconds(1);
-        
+        E_animator.SetBool("attack", false);
+        finished = true;
     }
 }

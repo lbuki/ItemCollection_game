@@ -178,6 +178,8 @@ public class charaController : MonoBehaviour
         Destroy(this);//このオブジェクトのコンポーネントを消す
         Destroy(camera.GetComponent<cameraController>());//メインカメラのスクリプトを消す
         Destroy(this.gameObject);//ユニティちゃんを消す
+        this.enemy.GetComponent<enemyController>().E_animator.SetBool("attack", true);
+        this.enemy.GetComponent<enemyController>().E_animator.SetBool("is_running", false);
         Destroy(this.enemy.GetComponent<enemyController>());
     }
 }
