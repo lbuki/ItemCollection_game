@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 public class charaController : MonoBehaviour
 {
-    int a=0;
     GameObject camera;//デストロイ用
     GameObject effect;//デストロイ用
     GameObject enemy;//デストロイ用
+    GameObject gravity;
     Vector3 cameraRot;
     Rigidbody rigid;
     float walkSpeed;
@@ -25,6 +25,7 @@ public class charaController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        this.gravity = GameObject.Find("G-force");
         this.effect = GameObject.Find("effect");
         this.camera = GameObject.Find("Main Camera");
         this.enemy = GameObject.Find("Misaki_win_humanoid");
@@ -134,6 +135,7 @@ public class charaController : MonoBehaviour
     }
     void FixedUpdate() //一定時間で呼び出される(等間隔)
     {
+        gravity.GetComponent<worldGravitySetting>().attachGravity(this.rigid);
         if (TotalWalkspeed < maxWalkSpeed)
         {
             this.rigid.AddForce(transform.forward * this.walkSpeed * speedScale);

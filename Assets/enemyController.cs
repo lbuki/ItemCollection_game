@@ -6,6 +6,7 @@ public class enemyController : MonoBehaviour
 {
     GameObject target;
     GameObject attack;
+    GameObject gravity;
     Rigidbody E_rigid;
     Vector3 T_Vector;
     public Animator E_animator;
@@ -13,12 +14,12 @@ public class enemyController : MonoBehaviour
     bool attackCheck = false;
     bool finished = true;
     float totalWalkspeed;
-    float walkSpeed　= 10f;//加える力
+    float walkSpeed　= 15f;//加える力
     float speedScale = 1f;//後で速さを変更できるように倍率を設定
     const float maxWalkSpeed = 5.0f;
     void Start()
     {
-        
+        this.gravity = GameObject.Find("G-force");
         this.attack = GameObject.Find("areaGenerator");
         this.E_rigid = GetComponent<Rigidbody>();
         this.target = GameObject.Find("SD_unitychan_humanoid");
@@ -38,6 +39,7 @@ public class enemyController : MonoBehaviour
     }
     void FixedUpdate()
     {
+        gravity.GetComponent<worldGravitySetting>().attachGravity(this.E_rigid);
         T_Vector = target.transform.position - this.transform.position;
         Quaternion direction = Quaternion.LookRotation(T_Vector);//targetの向きを向く
         direction.x = 0f;
@@ -52,8 +54,7 @@ public class enemyController : MonoBehaviour
         {
             //this.E_rigid.velocity　= new Vector3(0.8f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.8f * this.E_rigid.velocity.z);
         }
-
-        Debug.Log("あたっく"+attackCheck);
+        //Debug.Log("あたっく"+attackCheck);
     }
     void OnTriggerEnter(Collider objName)
     {
@@ -87,7 +88,6 @@ public class enemyController : MonoBehaviour
     }
     IEnumerator attackFunc()
     {
-        Debug.Log("yonda");
         finished = false;
         yield return new WaitForSeconds(0.6f);
         attack.GetComponent<attackController>().generateAttackArea();
