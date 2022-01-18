@@ -9,10 +9,13 @@ public class enemyController : MonoBehaviour
     GameObject gravity;
     Rigidbody E_rigid;
     Vector3 T_Vector;
+    [System.NonSerialized]
     public Animator E_animator;
     bool nearBy = false;
     bool attackCheck = false;
     bool finished = true;
+    [System.NonSerialized]
+    public bool chase = false;
     float totalWalkspeed;
     float walkSpeed　= 15f;//加える力
     float speedScale = 1f;//後で速さを変更できるように倍率を設定
@@ -24,14 +27,22 @@ public class enemyController : MonoBehaviour
         this.E_rigid = GetComponent<Rigidbody>();
         this.target = GameObject.Find("SD_unitychan_humanoid");
         E_animator = GetComponent<Animator>();
-        E_animator.SetBool("is_running", true);
+        E_animator.SetBool("is_running", false);
         E_animator.SetBool("attack", false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(attackCheck == true)
+        if (chase == true)
+        {
+            E_animator.SetBool("is_running", true);
+        }
+        else
+        {
+            E_animator.SetBool("is_running", false);
+        }
+        if(attackCheck == true && chase == true)
         {
             StartCoroutine(attackFunc());
             attackCheck = false;
@@ -40,25 +51,33 @@ public class enemyController : MonoBehaviour
     void FixedUpdate()
     {
         gravity.GetComponent<worldGravitySetting>().attachGravity(this.E_rigid);
-        T_Vector = target.transform.position - this.transform.position;
-        Quaternion direction = Quaternion.LookRotation(T_Vector);//targetの向きを向く
-        direction.x = 0f;
-        direction.z = 0f;
-        this.transform.rotation = direction;
-        totalWalkspeed = Mathf.Abs(this.E_rigid.velocity.x) + Mathf.Abs(this.E_rigid.velocity.z);
-        if (finished == true && nearBy == false && totalWalkspeed < maxWalkSpeed)
+        if (chase == true)
         {
-            this.E_rigid.AddForce(transform.forward * walkSpeed * speedScale);
+            T_Vector = target.transform.position - this.transform.position;
+            Quaternion direction = Quaternion.LookRotation(T_Vector);//targetの向きを向く
+            direction.x = 0f;
+            direction.z = 0f;
+            this.transform.rotation = direction;
+            totalWalkspeed = Mathf.Abs(this.E_rigid.velocity.x) + Mathf.Abs(this.E_rigid.velocity.z);
+            if (finished == true && nearBy == false && totalWalkspeed < maxWalkSpeed)
+            {
+                this.E_rigid.AddForce(transform.forward * walkSpeed * speedScale);
+            }
+            else
+            {
+                //this.E_rigid.velocity　= new Vector3(0.8f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.8f * this.E_rigid.velocity.z);
+            }
+            //Debug.Log("あたっく"+attackCheck);
         }
         else
         {
-            //this.E_rigid.velocity　= new Vector3(0.8f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.8f * this.E_rigid.velocity.z);
+            E_animator.SetBool("is_running", false);
+            E_animator.SetBool("attack", false);
         }
-        //Debug.Log("あたっく"+attackCheck);
     }
     void OnTriggerEnter(Collider objName)
     {
-        if(objName.gameObject.name == "SD_unitychan_humanoid")
+        if(objName.gameObject.name == "SD_unitychan_humanoid" && chase == true)
         {
             attackCheck = true;
             E_animator.SetBool("attack", true);
@@ -78,7 +97,7 @@ public class enemyController : MonoBehaviour
     }
     void OnTriggerExit(Collider objName)
     {
-        if (objName.gameObject.name == "SD_unitychan_humanoid")
+        if (objName.gameObject.name == "SD_unitychan_humanoid" && chase == true)
         {
             nearBy = false;
             E_animator.SetBool("is_running", true);

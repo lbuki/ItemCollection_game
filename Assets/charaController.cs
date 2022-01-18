@@ -10,7 +10,7 @@ public class charaController : MonoBehaviour
     Vector3 cameraRot;
     Rigidbody rigid;
     float walkSpeed;
-    float jumpForce = 270f;
+    float jumpForce = 7f;
     float speedx;
     float speedz;
     float speedy;
@@ -119,7 +119,7 @@ public class charaController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && jumpAble == true)//ジャンプ関係 地面と接触していないと飛べない
         {
             animator.SetBool("isJumping", true);
-            this.rigid.AddForce(transform.up * jumpForce );
+            this.rigid.AddForce(transform.up * jumpForce ,ForceMode.Impulse);
             //jumpForce = 0f;
             jumpAble = false;
             //Debug.Log("tonda");

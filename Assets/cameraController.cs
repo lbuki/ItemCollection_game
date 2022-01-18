@@ -7,6 +7,7 @@ public class cameraController : MonoBehaviour
     // Start is called before the first frame update
     const float Max_y = 3f;
     const float Min_y = -0.25f;
+    [System.NonSerialized]
     public GameObject player;
     Vector3 playerPos;
     Vector3 playerMove;
