@@ -6,7 +6,7 @@ public class enemyController : MonoBehaviour
 {
     GameObject target;
     GameObject attack;
-    GameObject gravity;
+    GameObject UImanager;
     Rigidbody E_rigid;
     Vector3 T_Vector;
     [System.NonSerialized]
@@ -16,16 +16,19 @@ public class enemyController : MonoBehaviour
     bool finished = true;
     [System.NonSerialized]
     public bool chase = false;
+    float distance;
     float totalWalkspeed;
     float walkSpeed　= 15f;//加える力
     float speedScale = 1f;//後で速さを変更できるように倍率を設定
     const float maxWalkSpeed = 5.0f;
+    const float figureArea = 1f;//止まる範囲の距離(値は座標での距離)
     void Start()
     {
-        this.gravity = GameObject.Find("G-force");
+        this.UImanager = GameObject.Find("GameDirector");
         this.attack = GameObject.Find("areaGenerator");
         this.E_rigid = GetComponent<Rigidbody>();
         this.target = GameObject.Find("SD_unitychan_humanoid");
+        this.distance = this.distance = (this.transform.position - target.transform.position).sqrMagnitude;
         E_animator = GetComponent<Animator>();
         E_animator.SetBool("is_running", false);
         E_animator.SetBool("attack", false);
@@ -47,10 +50,36 @@ public class enemyController : MonoBehaviour
             StartCoroutine(attackFunc());
             attackCheck = false;
         }
+        this.distance = (this.transform.position - target.transform.position).sqrMagnitude;
+        if (distance < Mathf.Pow(figureArea, 2))//3平方なので、figureArea^2
+        {
+            nearBy = true;
+            E_animator.SetBool("is_running", false);
+            this.E_rigid.velocity = new Vector3(0.5f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.5f * this.E_rigid.velocity.z);
+            if(chase == true && finished == true)
+            {
+                attackCheck = true;
+            }
+            else if(chase == true)
+            {
+                E_animator.SetBool("attack", true);
+                nearBy = true;
+                E_animator.SetBool("is_running", false);
+                //speedScale = 0f;
+            }
+        }
+        else
+        {
+            if (chase == true)
+            {
+                nearBy = false;
+                E_animator.SetBool("is_running", true);
+            }
+        }
     }
     void FixedUpdate()
     {
-        gravity.GetComponent<worldGravitySetting>().attachGravity(this.E_rigid);
+        UImanager.GetComponent<gameDirector>().attachGravity(this.E_rigid);
         if (chase == true)
         {
             T_Vector = target.transform.position - this.transform.position;
@@ -73,36 +102,6 @@ public class enemyController : MonoBehaviour
         {
             E_animator.SetBool("is_running", false);
             E_animator.SetBool("attack", false);
-        }
-    }
-    void OnTriggerEnter(Collider objName)
-    {
-        if(objName.gameObject.name == "SD_unitychan_humanoid" && chase == true)
-        {
-            attackCheck = true;
-            E_animator.SetBool("attack", true);
-            nearBy = true;
-            E_animator.SetBool("is_running", false);
-            //speedScale = 0f;
-        }
-    }
-    void OnTriggerStay(Collider objName)
-    {
-        if (objName.gameObject.name == "SD_unitychan_humanoid")
-        {
-            nearBy = true;
-            E_animator.SetBool("is_running", false);
-            this.E_rigid.velocity = new Vector3(0.5f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.5f * this.E_rigid.velocity.z);
-        }
-    }
-    void OnTriggerExit(Collider objName)
-    {
-        if (objName.gameObject.name == "SD_unitychan_humanoid" && chase == true)
-        {
-            nearBy = false;
-            E_animator.SetBool("is_running", true);
-            //attackCheck = false;
-            //speedScale = 1.0f;
         }
     }
     IEnumerator attackFunc()

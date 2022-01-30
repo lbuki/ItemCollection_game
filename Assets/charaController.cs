@@ -6,7 +6,7 @@ public class charaController : MonoBehaviour
     GameObject camera;//デストロイ用
     GameObject effect;//デストロイ用
     GameObject enemy;//デストロイ用
-    GameObject gravity;
+    GameObject UImanager;
     Vector3 cameraRot;
     Rigidbody rigid;
     float walkSpeed;
@@ -16,6 +16,9 @@ public class charaController : MonoBehaviour
     float speedy;
     float TotalWalkspeed;
     float speedScale;
+    [System.NonSerialized]
+    public float stamina;
+    bool asDash = true;
     bool jumpAble = true;
 
     const string areaName = "attackAreaPrefab(Clone)";
@@ -25,8 +28,8 @@ public class charaController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        this.gravity = GameObject.Find("G-force");
-        this.effect = GameObject.Find("effect");
+        this.stamina = 100f;
+        this.UImanager = GameObject.Find("GameDirector");
         this.camera = GameObject.Find("Main Camera");
         this.enemy = GameObject.Find("Misaki_win_humanoid");
         animator = GetComponent<Animator>();
@@ -43,7 +46,7 @@ public class charaController : MonoBehaviour
         cameraRot = camera.transform.rotation.eulerAngles;  //カメラの角度（オイラー角）
         cameraRot.x = 0;
         cameraRot.z = 0;                                    //キャラにx,z軸の変更は不要
-
+        Debug.Log("スタミナ残量:"+stamina);
         if (Input.GetKey(KeyCode.D) && Input.GetKey(KeyCode.W))           //↗︎
         {
             this.transform.rotation = Quaternion.Euler(cameraRot);
@@ -105,10 +108,32 @@ public class charaController : MonoBehaviour
             animator.SetBool("isWalking", false);
         }                                             //キャラ移動コード
 
-        if (Input.GetKey(KeyCode.R))
+        if (Input.GetKey(KeyCode.R) && asDash == true)
         {
             animator.SetBool("isDash", true);
             speedScale = 2.0f;
+
+            if(stamina > 0)//スタミナシステム
+            {
+                stamina -= 30f * Time.deltaTime;
+            }
+            else
+            {
+                asDash = false;
+                StartCoroutine(healStamina());
+            }
+        }
+        else if(asDash == true)
+        {
+            if (stamina >= 100f)
+            {
+                stamina = 100f;
+            }
+            else
+            {
+                stamina += 15f * Time.deltaTime;
+            }
+            speedScale = 1.0f;
         }
         else
         {
@@ -118,8 +143,7 @@ public class charaController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && jumpAble == true)//ジャンプ関係 地面と接触していないと飛べない
         {
-            animator.SetBool("isJumping", true);
-            this.rigid.AddForce(transform.up * jumpForce ,ForceMode.Impulse);
+            StartCoroutine(jumpFunc());
             //jumpForce = 0f;
             jumpAble = false;
             //Debug.Log("tonda");
@@ -128,14 +152,11 @@ public class charaController : MonoBehaviour
         {
             //jumpForce += 1f;
         }
-        
-        //Debug.Log("velo = "+this.rigid.velocity);
-        //Debug.Log(jumpAble);
-        //Debug.Log(speedScale);
+        Debug.Log("asDash"+asDash);
     }
     void FixedUpdate() //一定時間で呼び出される(等間隔)
     {
-        gravity.GetComponent<worldGravitySetting>().attachGravity(this.rigid);
+        UImanager.GetComponent<gameDirector>().attachGravity(this.rigid);
         if (TotalWalkspeed < maxWalkSpeed)
         {
             this.rigid.AddForce(transform.forward * this.walkSpeed * speedScale);
@@ -143,14 +164,23 @@ public class charaController : MonoBehaviour
     }
     void OnTriggerEnter(Collider objName)
     {
-        animator.SetBool("isJumping", false);
-        
+        if(objName.gameObject.name != "attackAreaPrefab(Clone)")
+        {
+            animator.SetBool("top", true);
+            //animator.SetBool("isJumping", false);
+        }
+        if (objName.gameObject.name == areaName)//ゲームオーバーでキャラを消す
+        {
+            deletePlayer();
+            Debug.Log("effectOn!");
+        }
     }
-    void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision objName)
     {
-        jumpAble = true;
-        //Debug.Log(collision.gameObject.name);
-        if (collision.gameObject.name == "Field")
+        StartCoroutine(jumpInterval());
+        animator.SetBool("top", false);
+        animator.SetBool("isJumping", false);
+        if (objName.gameObject.name == "Field")
         {
             
             //Debug.Log("field");
@@ -161,27 +191,41 @@ public class charaController : MonoBehaviour
             animator.SetBool("isJumping", false);
             //jumpAble = false;
         }
-        if (collision.gameObject.name == areaName)//ゲームオーバーでキャラを消す
-        {
-            deletePlayer();
-            Debug.Log("effectOn!");
-        }
-
     }
-    private void OnTriggerStay(Collider objName)
+    
+    IEnumerator healStamina()
     {
-        
+        while(stamina < 100)
+        {
+            stamina += 8f * Time.deltaTime;
+            if(stamina > 100f)
+            {
+                stamina = 100f;
+                asDash = true;
+            }
+            yield return null;
+        }
+    }
+    IEnumerator jumpInterval()
+    {
+        yield return new WaitForSeconds(0.5f);
+        jumpAble = true;
+    }
+    IEnumerator jumpFunc()
+    {
+        animator.SetBool("isJumping", true);
+        yield return new WaitForSeconds(0.1f);
+        this.rigid.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
     void deletePlayer()
     {
         Vector3 playPos = this.transform.position;
         playPos.y += 1.0f;
-        effect.GetComponent<effectController>().playEffect(playPos);
-        Destroy(this);//このオブジェクトのコンポーネントを消す
-        Destroy(camera.GetComponent<cameraController>());//メインカメラのスクリプトを消す
-        Destroy(this.gameObject);//ユニティちゃんを消す
+        UImanager.GetComponent<gameDirector>().playEffect(playPos);
+        UImanager.GetComponent<gameDirector>().hideGauge();
+        this.gameObject.SetActive(false);
+        this.enemy.GetComponent<enemyController>().chase = false;
         this.enemy.GetComponent<enemyController>().E_animator.SetBool("attack", true);
         this.enemy.GetComponent<enemyController>().E_animator.SetBool("is_running", false);
-        Destroy(this.enemy.GetComponent<enemyController>());
     }
 }
