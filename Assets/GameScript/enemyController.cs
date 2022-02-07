@@ -54,7 +54,10 @@ public class enemyController : MonoBehaviour
         this.distance = (this.transform.position - target.transform.position).sqrMagnitude;
         if (distance < Mathf.Pow(figureArea, 2))//3平方なので、figureArea^2
         {
-            this.E_rigid.velocity = new Vector3(0.5f * this.E_rigid.velocity.x, this.E_rigid.velocity.y, 0.5f * this.E_rigid.velocity.z);
+            this.E_rigid.velocity =
+                new Vector3(0.5f * this.E_rigid.velocity.x,
+                            this.E_rigid.velocity.y,
+                            0.5f * this.E_rigid.velocity.z);
             if(chase == true && finished == true)
             {
                 attackCheck = true;

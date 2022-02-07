@@ -23,10 +23,11 @@ public class charaController : MonoBehaviour
     public float stamina;
     bool asDash = true;
     bool jumpAble = true;
+    bool isMoving = false;
 
     const string areaName = "attackAreaPrefab(Clone)";
     const float maxWalkSpeed = 5;
-    const float addSpeed = 100f;//aaaaaaaaaaaaaaaaa
+    const float addSpeed = 40f;//aaaaaaaaaaaaaaaaa
     const float jumpTime = 0.3f;
     private Animator animator;
     // Use this for initialization
@@ -64,6 +65,7 @@ public class charaController : MonoBehaviour
             this.transform.Rotate(0, 135f, 0);
             walkSpeed = addSpeed;
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else if (Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.S))  //↙︎
         {
@@ -71,6 +73,7 @@ public class charaController : MonoBehaviour
             this.transform.Rotate(0, 225f, 0);
             walkSpeed = addSpeed;
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else if (Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.W))  //↖︎
         {
@@ -78,12 +81,14 @@ public class charaController : MonoBehaviour
             this.transform.Rotate(0, 315f, 0);
             walkSpeed = addSpeed;
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else if (Input.GetKey(KeyCode.W))                             //↑
         {
             this.transform.rotation = Quaternion.Euler(cameraRot);
             walkSpeed = addSpeed;
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else if (Input.GetKey(KeyCode.S))                              //↓
         {
@@ -91,6 +96,7 @@ public class charaController : MonoBehaviour
             this.transform.Rotate(0, 180f, 0);
             walkSpeed = addSpeed;
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else if (Input.GetKey(KeyCode.A))                               //←
         {
@@ -98,6 +104,7 @@ public class charaController : MonoBehaviour
             walkSpeed = addSpeed;
             this.transform.Rotate(0, 270f, 0);
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else if (Input.GetKey(KeyCode.D))                              //→
         {
@@ -105,25 +112,31 @@ public class charaController : MonoBehaviour
             this.transform.Rotate(0, 90f, 0);
             walkSpeed = addSpeed;
             animator.SetBool("isWalking", true);
+            this.isMoving = true;
         }
         else
         {
-            walkSpeed *= 0.95f;
+            walkSpeed *= 0f;
+            this.isMoving = false;
+
             animator.SetBool("isWalking", false);
         }                                             //キャラ移動コード
 
         if (Input.GetKey(KeyCode.R) && asDash == true)
         {
-            animator.SetBool("isDash", true);
-            speedScale = 2.0f;
-
             if(stamina > 0)//スタミナシステム
             {
-                stamina -= 30f * Time.deltaTime;
+                if (this.isMoving == true)
+                {
+                    stamina -= 20f * Time.deltaTime;
+                    animator.SetBool("isDash", true);
+                    speedScale = 2.0f;
+                }
             }
             else
             {
                 asDash = false;
+                animator.SetBool("isDash", false);
                 StartCoroutine(healStamina());
             }
         }
@@ -138,6 +151,7 @@ public class charaController : MonoBehaviour
                 stamina += 15f * Time.deltaTime;
             }
             speedScale = 1.0f;
+            animator.SetBool("isDash", false);
         }
         else
         {
@@ -157,7 +171,7 @@ public class charaController : MonoBehaviour
             //jumpForce += 1f;
         }
 
-        if(jumpAble == false && this.rigid.velocity.y <= 0)//空中の時
+        if(jumpAble == false && this.rigid.velocity.y < 0)//空中の時
         {
             ray = new Ray(this.transform.position, -transform.up);
             RaycastHit hit;
@@ -178,6 +192,7 @@ public class charaController : MonoBehaviour
     }
     void FixedUpdate() //一定時間で呼び出される(等間隔)
     {
+        this.rigid.velocity = new Vector3(this.rigid.velocity.x * 0.8f, this.rigid.velocity.y, this.rigid.velocity.z * 0.8f);
         UImanager.GetComponent<gameDirector>().attachGravity(this.rigid);
         if (TotalWalkspeed < maxWalkSpeed)
         {
@@ -190,7 +205,15 @@ public class charaController : MonoBehaviour
         {
             //animator.SetBool("isJumping", false);
         }
-        
+        if (objName.gameObject.name == areaName)//ゲームオーバーでキャラを消す
+        {
+            deletePlayer();
+            Debug.Log("effectOn!");
+        }
+    }
+    void OnTriggerStay(Collider objName)
+    {
+        animator.SetBool("top", true);
     }
     void OnCollisionEnter(Collision objName)
     {
@@ -207,11 +230,7 @@ public class charaController : MonoBehaviour
             animator.SetBool("isJumping", false);
             //jumpAble = false;
         }
-        if (objName.gameObject.name == areaName)//ゲームオーバーでキャラを消す
-        {
-            deletePlayer();
-            Debug.Log("effectOn!");
-        }
+        
 
         animator.SetBool("top", false);
     }

@@ -34,7 +34,7 @@ public class sercherController : MonoBehaviour
         this.C_rigid = GetComponent<Rigidbody>();
         this.distance = (this.transform.position - target.transform.position).sqrMagnitude;//3平方の2乗部分(負荷軽減の為、√する前の値)
         e_Controlle = this.enemy.GetComponent<enemyController>();//ファイル名が名前の変数を作ってみた
-        initPlace = new Vector3(60f, 1.3f, 15f);
+        initPlace = new Vector3(60f, 1.5f, 15f);
         this.transform.position = initPlace;
         patrol = true;
         if (C_rigid.useGravity == true)
@@ -94,9 +94,19 @@ public class sercherController : MonoBehaviour
         else if(patrol == false)
         {
             patrol = true;
-
         }
-        
+        if (e_Controlle.chase == true)
+        {
+            this.transform.position = initPlace;
+        }
+        if(e_Controlle.chase == true)
+        {
+            C_rigid.isKinematic = true;
+        }
+        else
+        {
+            C_rigid.isKinematic = false;
+        }
     }
     void FixedUpdate()
     {
@@ -109,7 +119,7 @@ public class sercherController : MonoBehaviour
             direction.z = 0f;
             this.transform.rotation = direction;
             totalWalkSpeed = Mathf.Abs(this.C_rigid.velocity.x) + Mathf.Abs(this.C_rigid.velocity.z);
-            if (totalWalkSpeed < maxWalkSpeed )
+            if (totalWalkSpeed < maxWalkSpeed && e_Controlle.chase == false)
             {
                 this.C_rigid.AddForce(this.transform.forward * walkSpeed * speedScale);
                 //Debug.Log("加速中");
@@ -119,10 +129,6 @@ public class sercherController : MonoBehaviour
                 //this.C_rigid.AddForce(this.transform.forward * walkSpeed * 0.8f);
             }
             C_rigid.velocity *= 0.95f;
-        }
-        else if (e_Controlle.chase == true)
-        {
-            this.transform.position = initPlace;
         }
     }
     void OnTriggerEnter(Collider objName)

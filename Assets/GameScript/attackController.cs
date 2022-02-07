@@ -8,7 +8,7 @@ public class attackController : MonoBehaviour
     private GameObject areaPrefab;//アウトレット接続
     Vector3 pos;
     GameObject Player;
-    const string name = "Misaki_win_humanoid";
+    string name = "Misaki_win_humanoid";
     private void Start()
     {
         this.Player=GameObject.Find(name);

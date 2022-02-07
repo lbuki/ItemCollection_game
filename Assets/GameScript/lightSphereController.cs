@@ -12,13 +12,12 @@ public class lightSphereController : MonoBehaviour
         searcher = GameObject.Find("searchArea");
     }
 
-    // Update is called once per frame
     void Update()
     {
         this.transform.position =
             new Vector3(searcher.transform.position.x,
             searcher.transform.position.y + areaHight + (Mathf.Sin(Time.time) / 8f),
             searcher.transform.position.z);
-
+        Debug.Log("searcherPos"+searcher.transform.position);
     }
 }
