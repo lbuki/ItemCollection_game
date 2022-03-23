@@ -3,22 +3,42 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-public class gameDirector : MonoBehaviour
+using UnityEngine.SceneManagement;
+
+[RequireComponent(typeof(AudioSource))]
+public class GameDirector : MonoBehaviour
 {
+    ObjNameList nameList;
+    [Tooltip("0はパソコン, 1はスマホで遊ぶ")]
+    internal int DeviceType = 0;
+
+    [SerializeField]
+    AudioClip[] clips = new AudioClip[5];//[0]=キャラ消滅, [1]=アイテム回収, [2]=静かな曲, [3]=うるさい曲, [4]=キャラボイス
+    AudioSource[] sources = new AudioSource[3];//[1]=SE,  [2],[3]=BGM
+    //protected AudioSource source2;
+    //protected AudioSource source3;
+
+    //-------------------------
 
     [Tooltip("重力の強さ")]
     public Vector3 gravityPower;
 
     //-------------------------
 
+    [System.NonSerialized]
+    internal float wasCollected = 0f;
+    [System.NonSerialized]
+    internal int itemAmount;
 
-
+    //-------------------------
+    GameObject canvas;
     //-------------------------
 
     [Tooltip("スタミナのテキストオブジェクトを入れるとこ")]
     public TextMeshProUGUI staminaText;
     string staminaValue;
     float maxTime = 0;
+    internal bool hideSwitch = false;
 
     //-------------------------
 
@@ -48,24 +68,65 @@ public class gameDirector : MonoBehaviour
 
     //-------------------------
 
-    GameObject staminaGauge;
-    GameObject staminaGauge_back;
+    int BGM_count = 1;
+    const float BGM_Volume = 0.15f;
+    float countTime = 0;
+
+    //-------------------------
+    //Image collectGauge_back;
+    Image collectGauge;
+    Image staminaGauge;
+    Image staminaGaugeBack;
     GameObject player;
-    GameObject enemy;
-    GameObject D_light;
-    GameObject effect;
-    charaController charaScript;
+    StampController stampScript;
+    EnemyController enemyScript;
+    Light directionalLight;
+    ParticleSystem effectScript;
+    CharaController playerScript;
+    void Awake()
+    {
+        nameList = GetComponent<ObjNameList>();
+    }
     void Start()
     {
-        this.staminaGauge = GameObject.Find("staminaGauge");
-        this.staminaGauge_back = GameObject.Find("staminaGauge_back");
-        this.player = GameObject.Find("SD_unitychan_humanoid");
-        this.enemy = GameObject.Find("Misaki_win_humanoid");
-        this.D_light = GameObject.Find("Directional Light");
-        this.effect = GameObject.Find("effect");
-        this.charaScript = player.GetComponent<charaController>();
-        this.staminaValue = null;
-        this.lightColor = D_light.GetComponent<Light>().color;
+        canvas = nameList.canvas;
+        player = nameList.player;
+        enemyScript = nameList.enemyScript;
+        directionalLight = nameList.lightScript;
+        
+        staminaValue = null;
+
+        effectScript = nameList.effectScript;
+        playerScript = nameList.playerScript;
+        stampScript = nameList.stampScript;
+        lightColor = nameList.lightScript.color;
+        collectGauge = nameList.collectGauge.GetComponent<Image>();
+        staminaGauge = nameList.staminaGauge.GetComponent<Image>();
+        staminaGaugeBack = nameList.staminaGaugeBack.GetComponent<Image>();
+        sources = GetComponents<AudioSource>();
+        AudioSource[] audio = GetComponents<AudioSource>();
+        sources[0].volume = 0.4f;
+        sources[1].volume = 0.1f;
+        sources[2].volume = 0.1f;
+        //collectGauge_back = GameObject.Find("collectGauge_back").GetComponent<Image>();
+
+        GameObject[] itemList = GameObject.FindGameObjectsWithTag("item");
+        itemAmount = itemList.Length;
+        if (DeviceType == 0 || DeviceType == 1)
+        {
+            if(DeviceType == 0)
+            {
+                GameObject[] buttonList = GameObject.FindGameObjectsWithTag("TapButton");
+                for(int i = 0; i < buttonList.Length; ++i)
+                {
+                    buttonList[i].SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            DeviceType = 0;
+        }
         R = setR_f;
         G = setG_f;
         B = setB_f;
@@ -76,9 +137,15 @@ public class gameDirector : MonoBehaviour
     void Update()
     {
         fpsDisplay();
+        itemGaugeDisplay();
         staminaDisplay();
         staminaGaugeDisplay();
         colorChanger();
+        BGM_changer();
+        if(hideSwitch == true)
+        {
+            hideGauge();
+        }
     }
     void fpsDisplay()
     {
@@ -93,10 +160,14 @@ public class gameDirector : MonoBehaviour
             this.lapTime = 0f;
         }
     }
+    void itemGaugeDisplay()
+    {
+        collectGauge.fillAmount = (this.wasCollected / itemAmount);
+    }
     void staminaGaugeDisplay()
     {
-        this.staminaGauge.GetComponent<Image>().fillAmount = charaScript.stamina / 100.0f;//スタミナゲージの更新
-        if(charaScript.stamina >= 100)
+        staminaGauge.fillAmount = playerScript.stamina / 100.0f;//スタミナゲージの更新
+        if(playerScript.stamina >= 100)
         {
             this.maxTime += Time.deltaTime;
         }
@@ -115,22 +186,23 @@ public class gameDirector : MonoBehaviour
     }
     public void hideGauge()
     {
-        this.staminaGauge.GetComponent<Image>().enabled = false;
-        this.staminaGauge_back.GetComponent<Image>().enabled = false;
+        staminaGauge.enabled = false;
+        staminaGaugeBack.enabled = false;
+        hideSwitch = false;
     }
     void showGauge()
     {
-        this.staminaGauge.GetComponent<Image>().enabled = true;
-        this.staminaGauge_back.GetComponent<Image>().enabled = true;
+        staminaGauge.enabled = true;
+        staminaGaugeBack.enabled = true;
     }
     void staminaDisplay()
     {
-        this.staminaValue = $"energy:{charaScript.stamina.ToString("F0")}";
+        this.staminaValue = $"energy:{playerScript.stamina.ToString("F0")}";
         this.staminaText.text = staminaValue;
     }
     void colorChanger()
     {
-        if (enemy.GetComponent<enemyController>().chase == false)
+        if (enemyScript.chase == false)
         {
             if (R > setR_f)
             {
@@ -190,12 +262,54 @@ public class gameDirector : MonoBehaviour
         lightColor.a = A;
         lightColor /= 255f;//0~1の間に変換
         //Debug.Log("R:"+R+"G:"+G+"B:"+B);
-        this.D_light.GetComponent<Light>().color = lightColor;
+        directionalLight.color = lightColor;
+    }
+    void BGM_changer()
+    {
+        if(enemyScript.chase == true)
+        {
+            if (BGM_count == 0)//追いかけ始めた時に音楽変える
+            {
+                sources[2].clip = clips[3];
+                sources[2].Play();
+                BGM_count = 1;
+                countTime = 0;
+            }
+            countTime += 0.1f * Time.deltaTime;
+            if (sources[2].volume < BGM_Volume)
+            {
+                sources[2].volume = countTime / BGM_Volume;
+            }
+            if (sources[1].volume > 0)
+            {
+                sources[1].volume = BGM_Volume - countTime;
+            }
+        }
+        else
+        {
+            if (BGM_count == 1)
+            {
+                sources[1].clip = clips[2];
+                sources[1].Play();
+                BGM_count = 0;
+                countTime = 0;
+            }
+            countTime += 0.1f * Time.deltaTime;
+            if (sources[1].volume < BGM_Volume)
+            {
+                sources[1].volume = countTime / BGM_Volume;
+            }
+            if (sources[2].volume > 0)
+            {
+                sources[2].volume = BGM_Volume - countTime;
+            }
+        }
     }
     public void playEffect(Vector3 playPos)
     {
-        this.effect.transform.position = playPos;
-        this.effect.GetComponent<ParticleSystem>().Play();
+        SE_delete();
+        this.effectScript.transform.position = playPos;
+        this.effectScript.Play();
     }
     public void attachGravity(Rigidbody rigid)//重力
     {
@@ -204,5 +318,53 @@ public class gameDirector : MonoBehaviour
             rigid.useGravity = false;
         }
         rigid.AddForce(gravityPower, ForceMode.Acceleration);//質量に関わらず均一に力を加える
+    }
+    IEnumerator volumeChanger()
+    {
+        while(sources[1].volume > 0)
+        {
+            sources[1].volume = (BGM_Volume - Time.deltaTime) /BGM_Volume;
+        }
+        while(sources[1].volume < BGM_Volume)
+        {
+            sources[1].volume = Time.deltaTime / BGM_Volume;
+        }
+        yield return null;
+    }
+    IEnumerator moveScene()
+    {
+        yield return new WaitForSeconds(3);
+        SceneManager.LoadScene("TitleScene");
+    }
+    IEnumerator clearAndMove()
+    {
+        
+        yield return new WaitForSeconds(3);
+        SceneManager.LoadScene("TitleScene");
+    }
+    IEnumerator SE_charaVoice()
+    {
+        yield return new WaitForSeconds(0.5f);
+        sources[0].volume = 1f;
+        sources[0].pitch = 1f;
+        sources[0].PlayOneShot(clips[4], 1f);
+    }
+    void SE_delete()
+    {
+        this.sources[0].pitch = 1f;
+        this.sources[0].PlayOneShot(clips[0], 0.8f);
+    }
+    internal void SE_collect()
+    {
+        sources[0].pitch = 1f;
+        sources[0].PlayOneShot(clips[1], 1f);
+    }
+    internal void playVoice()
+    {
+        StartCoroutine(SE_charaVoice());
+    }
+    internal void moveTitle()
+    {
+        StartCoroutine(moveScene());
     }
 }

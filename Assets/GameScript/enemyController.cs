@@ -2,36 +2,55 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class enemyController : MonoBehaviour
+[RequireComponent(typeof(AudioSource))]
+public class EnemyController : MonoBehaviour
 {
+    [SerializeField]
+    AudioClip[] clips;//[0]=笑い声1, [1]=笑い声2
+    AudioSource source;
+    Rigidbody rigid;
+    internal Animator animator;
+
+    AttackController attackScript;
+    ObjNameList nameList;
+    GameDirector UImanager;
+
     GameObject target;
-    GameObject attack;
-    GameObject UImanager;
-    Rigidbody E_rigid;
     Vector3 T_Vector;
+
     [System.NonSerialized]
-    public Animator E_animator;
     bool nearBy = false;
-    bool attackCheck = false;
-    bool finished = true;
     [System.NonSerialized]
     public bool chase = false;
+    bool attackCheck = false;
+    bool finished = true;
+
+    float countTime = 0;
     float distance;
     float totalWalkspeed;
     float walkSpeed　= 15f;//加える力
     float speedScale = 1f;//後で速さを変更できるように倍率を設定
+
     const float maxWalkSpeed = 5.0f;
     const float figureArea = 1f;//止まる範囲の距離(値は座標での距離)
+
+    void Awake()
+    {
+        nameList = GameObject.Find("GameDirector").GetComponent<ObjNameList>();
+    }
     void Start()
     {
-        this.UImanager = GameObject.Find("GameDirector");
-        this.attack = GameObject.Find("areaGenerator");
-        this.E_rigid = GetComponent<Rigidbody>();
-        this.target = GameObject.Find("SD_unitychan_humanoid");
-        this.distance = this.distance = (this.transform.position - target.transform.position).sqrMagnitude;
-        E_animator = GetComponent<Animator>();
-        E_animator.SetBool("is_running", false);
-        E_animator.SetBool("attack", false);
+        UImanager = nameList.UImanager;
+        attackScript = nameList.attackScript;
+        rigid = GetComponent<Rigidbody>();
+        source = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
+
+        animator.SetBool("is_running", false);
+        animator.SetBool("attack", false);
+
+        target = nameList.player;
+        distance = this.distance = (this.transform.position - target.transform.position).sqrMagnitude;
     }
 
     // Update is called once per frame
@@ -39,25 +58,25 @@ public class enemyController : MonoBehaviour
     {
         if (chase == true　&& nearBy == false)
         {
-            E_animator.SetBool("is_running", true);
+            animator.SetBool("is_running", true);
         }
         else
         {
-            E_animator.SetBool("is_running", false);
+            animator.SetBool("is_running", false);
         }
         if(attackCheck == true && chase == true)
         {
-            E_animator.SetBool("attack", true);
+            animator.SetBool("attack", true);
             StartCoroutine(attackFunc());
             attackCheck = false;
         }
-        this.distance = (this.transform.position - target.transform.position).sqrMagnitude;
+        distance = (this.transform.position - target.transform.position).sqrMagnitude;
         if (distance < Mathf.Pow(figureArea, 2))//3平方なので、figureArea^2
         {
-            this.E_rigid.velocity =
-                new Vector3(0.5f * this.E_rigid.velocity.x,
-                            this.E_rigid.velocity.y,
-                            0.5f * this.E_rigid.velocity.z);
+            this.rigid.velocity =
+                new Vector3(0.5f * rigid.velocity.x,
+                            this.rigid.velocity.y,
+                            0.5f * rigid.velocity.z);
             if(chase == true && finished == true)
             {
                 attackCheck = true;
@@ -65,19 +84,23 @@ public class enemyController : MonoBehaviour
             else if(chase == true)
             {
                 nearBy = true;
-                E_animator.SetBool("is_running", false);
+                animator.SetBool("is_running", false);
                 //speedScale = 0f;
             }
         }
         else if (chase == true)
         {
                 nearBy = false;
-                E_animator.SetBool("is_running", true);
+                animator.SetBool("is_running", true);
+        }
+        if(chase == true)
+        {
+            voiceOfEnemy();
         }
     }
     void FixedUpdate()
     {
-        UImanager.GetComponent<gameDirector>().attachGravity(this.E_rigid);
+        UImanager.attachGravity(this.rigid);
         if (chase == true)
         {
             T_Vector = target.transform.position - this.transform.position;
@@ -85,10 +108,10 @@ public class enemyController : MonoBehaviour
             direction.x = 0f;
             direction.z = 0f;
             this.transform.rotation = direction;
-            totalWalkspeed = Mathf.Abs(this.E_rigid.velocity.x) + Mathf.Abs(this.E_rigid.velocity.z);
+            totalWalkspeed = Mathf.Abs(rigid.velocity.x) + Mathf.Abs(rigid.velocity.z);
             if (finished == true && nearBy == false && totalWalkspeed < maxWalkSpeed)
             {
-                this.E_rigid.AddForce(transform.forward * walkSpeed * speedScale);
+                rigid.AddForce(transform.forward * walkSpeed * speedScale);
             }
             else
             {
@@ -98,17 +121,26 @@ public class enemyController : MonoBehaviour
         }
         else
         {
-            E_animator.SetBool("is_running", false);
-            E_animator.SetBool("attack", false);
+            animator.SetBool("is_running", false);
+            animator.SetBool("attack", false);
+        }
+    }
+    void voiceOfEnemy()
+    {
+        countTime += Time.deltaTime;
+        if(countTime > Random.Range(3, 10))
+        {
+            countTime = 0;
+            source.PlayOneShot(clips[Random.Range(0, clips.Length)], Random.Range(0.1f, 0.7f));
         }
     }
     IEnumerator attackFunc()
     {
         finished = false;
         yield return new WaitForSeconds(0.6f);
-        attack.GetComponent<attackController>().generateAttackArea();
+        attackScript.generateAttackArea();
         yield return new WaitForSeconds(1);
-        E_animator.SetBool("attack", false);
+        animator.SetBool("attack", false);
         finished = true;
     }
 }

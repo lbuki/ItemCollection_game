@@ -1527,9 +1527,16 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0
-        functionName: OnCallChangeFace
-        data: surprise@sd_hmd
+      - time: 0.4358974
+        functionName: PlayFootstepSE
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.96081215
+        functionName: PlayFootstepSE
+        data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
@@ -4684,16 +4691,9 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.23575942
-        functionName: OnCallChangeFace
-        data: eye_close@sd_hmd
-        objectReferenceParameter: {instanceID: 0}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.43987337
-        functionName: OnCallChangeFace
-        data: default@sd_hmd
+      - time: 0.32977653
+        functionName: PlayFootstepSE
+        data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0

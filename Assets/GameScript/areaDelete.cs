@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class areaDelete : MonoBehaviour
+public class AreaDelete : MonoBehaviour
 {
     float time = 0;
     void Update()

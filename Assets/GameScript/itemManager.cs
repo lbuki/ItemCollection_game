@@ -1,35 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class itemManager : MonoBehaviour
+public class ItemManager : MonoBehaviour
 {
-    enemyController e_Controlle;
-    charaController c_Controlle;
-    GameObject chara;
+    EnemyController enemyScript;
+    CharaController playerScript;
+    GameDirector UImanager;
+    ObjNameList nameList;
+
+    GameObject player;
+    Vector3 relDistance;
     float hight;
     float distance;
-    Vector3 relDistance;
 
+    void Awake()
+    {
+        nameList = GameObject.Find("GameDirector").GetComponent<ObjNameList>();
+    }
     void Start()
     {
-        this.chara = GameObject.Find("SD_unitychan_humanoid");
-        this.hight = this.transform.position.y;
-        this.e_Controlle = GameObject.Find("Misaki_win_humanoid").GetComponent<enemyController>();
-        this.c_Controlle = GameObject.Find("SD_unitychan_humanoid").GetComponent<charaController>();
+        player = nameList.player;
+        hight = this.transform.position.y;
+        enemyScript = nameList.enemyScript;
+        playerScript = nameList.playerScript;
+        UImanager = nameList.UImanager;
     }
 
     void Update()
     {
-        this.relDistance = chara.transform.position - this.transform.position;
-        this.distance = Mathf.Pow(Mathf.Abs(relDistance.x),2)
-            + Mathf.Pow(Mathf.Abs(relDistance.y), 2)
-            + Mathf.Pow(Mathf.Abs(relDistance.z), 2);
-        this.transform.Rotate(50f * Time.deltaTime, 50f * Time.deltaTime, 50f * Time.deltaTime);
-        this.transform.position =
-            new Vector3(this.transform.position.x,
+        relDistance = player.transform.position - this.transform.position;
+        distance = Mathf.Pow(Mathf.Abs(relDistance.x), 2)
+                                + Mathf.Pow(Mathf.Abs(relDistance.y), 2)
+                                + Mathf.Pow(Mathf.Abs(relDistance.z), 2);
+        transform.Rotate(50f * Time.deltaTime,
+                         50f * Time.deltaTime,
+                         50f * Time.deltaTime);
+        transform.position =
+            new Vector3(transform.position.x,
                         hight + Mathf.Sin(Time.time)/10f,
-                        this.transform.position.z);
+                        transform.position.z);
         if(this.distance < 1.3f)
         {
             collected();
@@ -37,11 +46,15 @@ public class itemManager : MonoBehaviour
     }
     void collected()
     {
-        if (e_Controlle.chase == true)//アイテムを拾うと、追いかけられるのが止まる
+        if (enemyScript.chase == true)//アイテムを拾うと、追いかけられるのが止まる
         {
-            e_Controlle.chase = false;
+            enemyScript.chase = false;
         }
+        if (UImanager.wasCollected < UImanager.itemAmount)
+        {
+            UImanager.wasCollected += 1;
+        }
+        UImanager.SE_collect();
         Destroy(this.gameObject);
-        Debug.Log("でりーと");
     }
 }
