@@ -10,7 +10,7 @@ public class GameDirector : MonoBehaviour
 {
     ObjNameList nameList;
     [Tooltip("0はパソコン, 1はスマホで遊ぶ")]
-    internal int DeviceType = 0;
+    public int DeviceType = 0;
 
     [SerializeField]
     AudioClip[] clips = new AudioClip[5];//[0]=キャラ消滅, [1]=アイテム回収, [2]=静かな曲, [3]=うるさい曲, [4]=キャラボイス
@@ -21,7 +21,8 @@ public class GameDirector : MonoBehaviour
     //-------------------------
 
     [Tooltip("重力の強さ")]
-    public Vector3 gravityPower;
+    [SerializeField]
+    internal Vector3 gravityPower;
 
     //-------------------------
 
@@ -35,7 +36,8 @@ public class GameDirector : MonoBehaviour
     //-------------------------
 
     [Tooltip("スタミナのテキストオブジェクトを入れるとこ")]
-    public TextMeshProUGUI staminaText;
+    [SerializeField]
+    internal TextMeshProUGUI staminaText;
     string staminaValue;
     float maxTime = 0;
     internal bool hideSwitch = false;
@@ -45,7 +47,7 @@ public class GameDirector : MonoBehaviour
     int frameCount = 0;
     float lapTime = 0;
     [SerializeField,Tooltip("fpsのテキストオブジェクトを入れるとこ")]
-    private TextMeshProUGUI fpsText;
+    TextMeshProUGUI fpsText;
     //public GameObject fpsObject = null;
     string fpsRate;
 
@@ -110,6 +112,11 @@ public class GameDirector : MonoBehaviour
         sources[2].volume = 0.1f;
         //collectGauge_back = GameObject.Find("collectGauge_back").GetComponent<Image>();
 
+        if(gravityPower == null || gravityPower.y == 0)
+        {
+            gravityPower = new Vector3(0, -10, 0);
+        }
+
         GameObject[] itemList = GameObject.FindGameObjectsWithTag("item");
         itemAmount = itemList.Length;
         if (DeviceType == 0 || DeviceType == 1)
@@ -149,31 +156,31 @@ public class GameDirector : MonoBehaviour
     }
     void fpsDisplay()
     {
-        this.frameCount++;
-        this.lapTime += Time.deltaTime;
+        frameCount++;
+        lapTime += Time.deltaTime;
         if (lapTime >= 0.5f) //0.5秒毎にfps計算
         {
             float fps = 1.0f * frameCount / lapTime;
-            this.fpsRate = $"FPS:{fps.ToString("F2")}";
-            this.fpsText.text = fpsRate;
-            this.frameCount = 0;
-            this.lapTime = 0f;
+            fpsRate = $"FPS:{fps.ToString("F2")}";
+            fpsText.text = fpsRate;
+            frameCount = 0;
+            lapTime = 0f;
         }
     }
     void itemGaugeDisplay()
     {
-        collectGauge.fillAmount = (this.wasCollected / itemAmount);
+        collectGauge.fillAmount = (wasCollected / itemAmount);
     }
     void staminaGaugeDisplay()
     {
         staminaGauge.fillAmount = playerScript.stamina / 100.0f;//スタミナゲージの更新
         if(playerScript.stamina >= 100)
         {
-            this.maxTime += Time.deltaTime;
+            maxTime += Time.deltaTime;
         }
         else
         {
-            this.maxTime = 0f;
+            maxTime = 0f;
         }
         if(maxTime > 2.0f)
         {
@@ -184,7 +191,7 @@ public class GameDirector : MonoBehaviour
             showGauge();
         }
     }
-    public void hideGauge()
+    internal void hideGauge()
     {
         staminaGauge.enabled = false;
         staminaGaugeBack.enabled = false;
@@ -197,8 +204,8 @@ public class GameDirector : MonoBehaviour
     }
     void staminaDisplay()
     {
-        this.staminaValue = $"energy:{playerScript.stamina.ToString("F0")}";
-        this.staminaText.text = staminaValue;
+        staminaValue = $"energy:{playerScript.stamina.ToString("F0")}";
+        staminaText.text = staminaValue;
     }
     void colorChanger()
     {
@@ -305,13 +312,13 @@ public class GameDirector : MonoBehaviour
             }
         }
     }
-    public void playEffect(Vector3 playPos)
+    internal void playEffect(Vector3 playPos)
     {
         SE_delete();
         this.effectScript.transform.position = playPos;
         this.effectScript.Play();
     }
-    public void attachGravity(Rigidbody rigid)//重力
+    internal void attachGravity(Rigidbody rigid)//重力
     {
         if (rigid.useGravity == true)
         {

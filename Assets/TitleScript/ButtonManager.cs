@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class ButtonManager : MonoBehaviour
 {
-    public void playButtonDown()
+    internal void playButtonDown()
     {
         SceneManager.LoadScene("GameScene");
     }

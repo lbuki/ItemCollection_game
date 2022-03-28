@@ -429,7 +429,7 @@ public class CharaController : MonoBehaviour
         enemyScript.animator.SetBool("attack", true);
         enemyScript.animator.SetBool("is_running", false);
     }
-    public void J_button()
+    internal void J_button()
     {
         if (UImanager.DeviceType == 1 &&jumpAble == true)//ジャンプ関係 地面と接触していないと飛べない
         {
@@ -439,19 +439,19 @@ public class CharaController : MonoBehaviour
             //Debug.Log("tonda");
         }
     }
-    public void Touching()
+    internal void Touching()
     {
         touching = true;
     }
-    public void nonTouch()
+    internal void nonTouch()
     {
         touching = false;
     }
-    public void R_Touching()
+    internal void R_Touching()
     {
         R_touching = true;
     }
-    public void R_nonTouch()
+    internal void R_nonTouch()
     {
         StartCoroutine(touchInterval());
     }

@@ -122,7 +122,7 @@ public class CameraController : MonoBehaviour
         }
         
     }
-    public void cameraInit()
+    internal void cameraInit()
     {
         transform.position = new Vector3(playerPos.x, playerPos.y, playerPos.z);
         pivot = new Vector3(playerPos.x, playerPos.y + defoHight, playerPos.z);
@@ -141,35 +141,35 @@ public class CameraController : MonoBehaviour
         transform.Translate(0f, -0.5f, 1.3f, Space.Self);
         transform.Rotate(5f, 160f, 0f);
     }
-    public void L_buttonPush()
+    internal void L_buttonPush()
     {
         L_push = true;
     }
-    public void R_buttonPush()
+    internal void R_buttonPush()
     {
         R_push = true;
     }
-    public void U_buttonPush()
+    internal void U_buttonPush()
     {
         U_push = true;
     }
-    public void D_buttonPush()
+    internal void D_buttonPush()
     {
         D_push = true;
     }
-    public void L_buttonUp()
+    internal void L_buttonUp()
     {
         L_push = false;
     }
-    public void R_buttonUp()
+    internal void R_buttonUp()
     {
         R_push = false;
     }
-    public void U_buttonUp()
+    internal void U_buttonUp()
     {
         U_push = false;
     }
-    public void D_buttonUp()
+    internal void D_buttonUp()
     {
         D_push = false;
     }

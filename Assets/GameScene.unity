@@ -9271,7 +9271,7 @@ RectTransform:
   m_GameObject: {fileID: 1607670294}
   m_LocalRotation: {x: 0, y: 0, z: 0.026176926, w: 0.9996574}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 0.45, y: 0.45, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 472492162}
@@ -9279,7 +9279,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 3}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -400, y: 0}
+  m_AnchoredPosition: {x: -600, y: 0}
   m_SizeDelta: {x: 970, y: 1600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1607670296
@@ -9926,6 +9926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79fab788d008d4e6a8e17af4ed7d2404, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DeviceType: 0
   clips:
   - {fileID: 8300000, guid: 10368582841294a41a7ccf0568b0293e, type: 3}
   - {fileID: 8300000, guid: adda4a856700041c4af2634a08338bd3, type: 3}
@@ -10264,6 +10265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   outStamp: {fileID: 592774963}
   clearStamp: {fileID: 1607670294}
+  goalScale: 0.5
 --- !u!1 &1950066953
 GameObject:
   m_ObjectHideFlags: 0

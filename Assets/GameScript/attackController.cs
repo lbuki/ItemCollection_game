@@ -21,8 +21,8 @@ public class AttackController : MonoBehaviour
         player = nameList.enemy;
     }
     // Start is called before the first frame update
-    
-    public void generateAttackArea()
+
+    internal void generateAttackArea()
     {
         GameObject square = Instantiate(areaPrefab) as GameObject;
         pos = this.player.transform.position;

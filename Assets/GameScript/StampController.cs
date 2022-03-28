@@ -15,7 +15,8 @@ public class StampController : MonoBehaviour
     GameDirector UImanagaer;
     Vector3 iconVolume;
 
-
+    [SerializeField]
+    float goalScale;
     float scale = 3f;
     float decreaseSpeed = 15f;
 
@@ -34,6 +35,10 @@ public class StampController : MonoBehaviour
         clearStamp.SetActive(false);
         outStamp.transform.localScale = iconVolume;
         clearStamp.transform.localScale = iconVolume;
+        if(goalScale == 0)
+        {
+            goalScale = 0.4f;
+        }
     }
     void Update()
     {
