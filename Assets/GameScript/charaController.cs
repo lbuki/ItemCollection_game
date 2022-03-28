@@ -43,7 +43,7 @@ public class CharaController : MonoBehaviour
     string areaName;
     const float maxWalkSpeed = 5;
     const float addSpeed = 40f;//aaaaaaaaaaaaaaaaa
-    const float jumpTime = 0.3f;
+    const float jumpTime = 0.15f;
     private Animator animator;
     // Use this for initialization
     void Awake()
@@ -286,24 +286,26 @@ public class CharaController : MonoBehaviour
             }
 
 
-
-            if (jumpAble == false && rigid.velocity.y < 0)//空中の時
+            if(jumpAble == false)
             {
-                ray = new Ray(transform.position, -transform.up);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 5f))
+                Debug.Log("速さ: "+rigid.velocity.y);
+            }
+            if (jumpAble == false &&rigid.velocity.y < -0.05f )//空中の時
+            {
+                if(playOnce == false)
                 {
-                    dropPoint = hit.point;
+                    ray = new Ray(transform.position, -transform.up);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, 5f))
+                    {
+                        dropPoint = hit.point;
+                    }
+                    dropTime = Mathf.Sqrt(2 * (dropPoint.y - transform.position.y) / (UImanager.gravityPower.y));
+                    StartCoroutine(landing(dropTime - jumpTime));
+                    Debug.Log((dropTime - jumpTime)+"秒後に着地");
+                    playOnce = true;
                 }
-                //運動方程式から地面に落ちる時刻を計測 h=0.5gt^2 → t^2 - 2h/g = 0を満たすまでやる
-                dropTime = 2 * (dropPoint.y - transform.position.y)
-                    / (UImanager.gravityPower.y);// 2h/gの値
-                if (Mathf.Pow(jumpTime, 2) - dropTime > 0)
-                {
-                    animator.SetBool("top", true);
-                }
-                //Debug.Log("drop:"+ (Mathf.Pow(jumpTime, 2) - dropTime));
-                //Debug.Log("h:" + (this.dropPoint.y - this.transform.position.y));
+                
             }
         }
         else//ゲームクリアした時
@@ -373,8 +375,8 @@ public class CharaController : MonoBehaviour
             animator.SetBool("isJumping", false);
             //jumpAble = false;
         }
-        
 
+        playOnce = false;
         animator.SetBool("top", false);
     }
     void OnCollisionStay(Collision objName)
@@ -404,6 +406,15 @@ public class CharaController : MonoBehaviour
         animator.SetBool("isJumping", true);
         yield return new WaitForSeconds(0.1f);
         rigid.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+    }
+    IEnumerator landing(float time)
+    {
+        if(time < 0)
+        {
+            time = Mathf.Abs(time);
+        }
+        yield return new WaitForSeconds(time);
+        animator.SetBool("top",true);
     }
     IEnumerator touchInterval()
     {

@@ -80,7 +80,7 @@ public class SercherController : MonoBehaviour
     }
     void Update()//patroleがtrueの時こっち, falseの時はFixedUpdate
     {
-        Debug.Log(transform.name + "の初期座標:" + initInfo.pos);
+        //Debug.Log(transform.name + "の初期座標:" + initInfo.pos);
         if (target != null)
         {
             if (patrol == true && enemyScript.chase == false)

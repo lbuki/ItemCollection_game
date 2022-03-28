@@ -45,7 +45,7 @@ public class StampController : MonoBehaviour
        if(UImanagaer.wasCollected == UImanagaer.itemAmount)
         {
             clearStamp.SetActive(true);
-            if(scale > 0.7f)
+            if(scale > goalScale)
             {
                 scale -= decreaseSpeed * Time.deltaTime;
                 iconVolume = new Vector3(scale, scale, 1f);
@@ -53,6 +53,8 @@ public class StampController : MonoBehaviour
             }
             else
             {
+                iconVolume = new Vector3(goalScale, goalScale, 1f);
+                clearStamp.transform.localScale = iconVolume;
                 playerScript.asClear = true;
                 UImanagaer.moveTitle();
             }
@@ -60,7 +62,7 @@ public class StampController : MonoBehaviour
        if(player.activeSelf == false)
         {
             outStamp.SetActive(true);
-            if (scale > 0.7f)
+            if (scale > goalScale)
             {
                 scale -= decreaseSpeed * Time.deltaTime;
                 iconVolume = new Vector3(scale, scale, 1f);
@@ -68,6 +70,8 @@ public class StampController : MonoBehaviour
             }
             else
             {
+                iconVolume = new Vector3(goalScale, goalScale, 1f);
+                clearStamp.transform.localScale = iconVolume;
                 playerScript.asClear = true;
                 UImanagaer.moveTitle();
             }
