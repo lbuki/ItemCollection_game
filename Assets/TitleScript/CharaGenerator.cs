@@ -17,7 +17,7 @@ public class CharaGenerator : MonoBehaviour
         {
             time = 0;
             GameObject charactor = Instantiate(chara[Random.Range(0,chara.Length)]) as GameObject;
-            pos = new Vector3(Random.Range(-5, 5), Random.Range(3, 5), Random.Range(-5, 5));
+            pos = new Vector3(Random.Range(-4, 4), Random.Range(3, 5), Random.Range(-4, 4));
             rot = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             charactor.transform.rotation = Quaternion.Euler(rot);
             charactor.transform.position = pos;

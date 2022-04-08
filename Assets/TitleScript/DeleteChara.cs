@@ -20,7 +20,7 @@ public class DeleteChara : MonoBehaviour
     void Update()
     {
         time += Time.deltaTime;
-        if (time > 10f)//1秒経過でオブジェクト消去
+        if (time > 15f)//10秒経過でオブジェクト消去
         {
             time = 0;
             Destroy(gameObject);

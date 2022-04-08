@@ -6,11 +6,22 @@ using UnityEngine;
 public class RotatePlane : MonoBehaviour
 {
     [SerializeField]
-    float rotateSpeed;
+    float rotateSpeed = 10f;
     Rigidbody rigid;
     void Start()
     {
         rigid = GetComponent<Rigidbody>();
+    }
+    void Update()
+    {
+        if (ButtonManager.DeviceType == 0)
+        {
+            rotateSpeed = 7f;
+        }
+        else if (ButtonManager.DeviceType == 1)
+        {
+            rotateSpeed = -7f;
+        }
     }
     void FixedUpdate()
     {

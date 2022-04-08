@@ -71,7 +71,7 @@ public class StampController : MonoBehaviour
             else
             {
                 iconVolume = new Vector3(goalScale, goalScale, 1f);
-                clearStamp.transform.localScale = iconVolume;
+                outStamp.transform.localScale = iconVolume;
                 playerScript.asClear = true;
                 UImanagaer.moveTitle();
             }

@@ -10,7 +10,7 @@ public class GameDirector : MonoBehaviour
 {
     ObjNameList nameList;
     [Tooltip("0はパソコン, 1はスマホで遊ぶ")]
-    public int DeviceType = 0;
+    internal int DeviceType;
 
     [SerializeField]
     AudioClip[] clips = new AudioClip[5];//[0]=キャラ消滅, [1]=アイテム回収, [2]=静かな曲, [3]=うるさい曲, [4]=キャラボイス
@@ -91,6 +91,7 @@ public class GameDirector : MonoBehaviour
     }
     void Start()
     {
+        DeviceType = ButtonManager.DeviceType;
         canvas = nameList.canvas;
         player = nameList.player;
         enemyScript = nameList.enemyScript;
@@ -132,7 +133,7 @@ public class GameDirector : MonoBehaviour
         }
         else
         {
-            DeviceType = 0;
+            DeviceType = 1;
         }
         R = setR_f;
         G = setG_f;
